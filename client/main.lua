@@ -1,1152 +1,442 @@
 local QBCore = exports['qb-core']:GetCoreObject()
-local onDuty = false
-local clean = false
-local client = false
-local status = false
-local smallblip = false
-local bigblip = false
-local bliptable = {}
-local delivery = 0
 
-RegisterNetEvent('QBCore:Client:OnPlayerLoaded')
-AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
-    PlayerPed = PlayerPedId()
-    QBCore.Functions.GetPlayerData(function(PlayerData)
-        PlayerJob = PlayerData.job
-        if PlayerData.job.onduty then
-            if PlayerData.job.name == Config.Job then
-                TriggerServerEvent("QBCore:ToggleDuty")
-            end
-        end
-    end)
-end)
-
-RegisterNetEvent('QBCore:Client:OnJobUpdate')
-AddEventHandler('QBCore:Client:OnJobUpdate', function(JobInfo)
-    PlayerJob = JobInfo
-    onDuty = PlayerJob.onduty
-end)
-
-RegisterNetEvent('QBCore:Client:SetDuty')
-AddEventHandler('QBCore:Client:SetDuty', function(duty)
-    onDuty = duty
-end)
-
-RegisterNetEvent('rz-burgershot:CraftSmallBagItem', function()
-    TriggerServerEvent('rz-burgershot:SmallBagItem')
-    TriggerServerEvent('rz-burgershot:givetoyburgershot')
-end)
-
-RegisterNetEvent('rz-burgershot:CraftBigBagItem', function()
-    TriggerServerEvent('rz-burgershot:BigBagItem')
-    TriggerServerEvent('rz-burgershot:givetoyburgershot')
-end)
-
-RegisterNetEvent('rz-burgershot:CraftGoatMenuItem', function()
-    TriggerServerEvent('rz-burgershot:GoatMenuItem')
-    TriggerServerEvent('rz-burgershot:givetoyburgershot')
-end)
-
-RegisterNetEvent('rz-burgershot:CraftCoffeeMenuItem', function()
-    TriggerServerEvent('rz-burgershot:CoffeeMenuItem')
-    TriggerServerEvent('rz-burgershot:givetoyburgershot')
-end)
-
-RegisterNetEvent("rz:burgershot:shop")
-AddEventHandler("rz:burgershot:shop", function()
-    if onDuty then
-        local PlayerData = QBCore.Functions.GetPlayerData()
-        if PlayerData.job and PlayerData.job.name == Config.Job then 
-            TriggerServerEvent("inventory:server:OpenInventory", "shop", "burgershot", Config.Shop)
-        end
-    else 
-        QBCore.Functions.Notify(Lang:t("notify.duty"), "error")
-	end  
-end)
-
----------Burger Shot Job---------
-
-RegisterNetEvent("rz-burgershot:duty")
-AddEventHandler("rz-burgershot:duty", function()
-    TriggerServerEvent("QBCore:ToggleDuty")
-end)
-
-RegisterNetEvent("rz-burgershot:tray")
-AddEventHandler("rz-burgershot:tray", function()
-    TriggerEvent("inventory:client:SetCurrentStash", "tray")
-    TriggerServerEvent("inventory:server:OpenInventory", "stash", "tray", {
-        maxweight = 5000,
-        slots = 5,
+RegisterNetEvent('rz:eat:craftmenu', function()
+    exports['qb-menu']:openMenu({
+        {
+            header = Lang:t("qbmenu.header"),
+            isMenuHeader = true,
+        },
+        {
+            id = 1,
+            header = Lang:t("qbmenu.smallcraft"),
+            txt = Lang:t("qbmenu.smallcrafttxt"),
+            params = {
+                event = "rz-burgershot:smallpacket",
+            }
+        },
+        {
+            id = 2,
+            header = Lang:t("qbmenu.bigcraft"),
+            txt = Lang:t("qbmenu.bigcrafttxt"),
+            params = {
+                event = "rz-burgershot:bigpacket",
+            }
+        },
+        {
+            id = 3,
+            header = Lang:t("qbmenu.goatcraft"),
+            txt = Lang:t("qbmenu.goatcrafttxt"),
+            params = {
+                event = "rz-burgershot:goatpacket",
+            }
+        },
+        {
+            id = 4,
+            header = Lang:t("qbmenu.coffecraft"),
+            txt = Lang:t("qbmenu.coffecrafttxt"),
+            params = {
+                event = "rz-burgershot:coffeepacket",
+            }
+        },
+        {
+            header = Lang:t("qbmenu.closemenu"),
+            params = { 
+                event = "qb-menu:client:closeMenu"
+            }
+        },
     })
 end)
 
-RegisterNetEvent("rz-burgershot:tray2")
-AddEventHandler("rz-burgershot:tray2", function()
-    TriggerEvent("inventory:client:SetCurrentStash", "tray2")
-    TriggerServerEvent("inventory:server:OpenInventory", "stash", "tray2", {
-        maxweight = 5000,
-        slots = 5,
+RegisterNetEvent('rz-burgershot:ordermenu', function(data)
+    exports['qb-menu']:openMenu({
+        {
+            header = Lang:t("qbmenu.Fridge"),
+            isMenuHeader = true
+        },
+        {
+            header = Lang:t("qbmenu.orderıtems"),
+            txt = Lang:t("qbmenu.orderıtemstxt"),
+            params = {
+                event = "rz:burgershot:shop"
+            }
+        },
+        {
+            header = Lang:t("qbmenu.fridgeheader"),
+            txt = Lang:t("qbmenu.fridgetxt"),
+            params = {
+                event = "rz-burgershot:storge2"
+            }
+        },
+        { 
+            header = Lang:t("qbmenu.macaroonheader"),
+            txt = Lang:t("qbmenu.macaroontxt"),
+            params = {
+                event = "rz-burgershot:client:macaroon",
+            }
+        },
+        { 
+            header = Lang:t("qbmenu.icecream"),
+            txt = Lang:t("label.IceCreamStation"),
+            params = {
+                event = "rz-burgershot:icecream",
+            }
+        },
+        {
+            header = Lang:t("qbmenu.closemenu"), 
+            params = { 
+                event = "qb-menu:client:closeMenu"
+            }
+        },
     })
 end)
 
-RegisterNetEvent("rz-burgershot:storge")
-AddEventHandler("rz-burgershot:storge", function()
-    if onDuty then
-        TriggerEvent("inventory:client:SetCurrentStash", "storge")
-        TriggerServerEvent("inventory:server:OpenInventory", "stash", "storge", {
-            maxweight = 250000,
-            slots = 40,
-        })
-    else
-        QBCore.Functions.Notify(Lang:t("notify.duty"), "error")
-    end
+RegisterNetEvent('rz-burgershot:dutymenu', function(data)
+    exports['qb-menu']:openMenu({
+        {
+            header = Lang:t("qbmenu.dutymenu"),
+            isMenuHeader = true
+        },
+        { 
+            header = Lang:t("qbmenu.dutyonoff"),
+            params = {
+                event = "rz-burgershot:duty",
+            }
+        },
+        {
+            header = Lang:t("qbmenu.closemenu"),
+            params = { 
+                event = "qb-menu:client:closeMenu"
+            }
+        },
+    })
 end)
 
-RegisterNetEvent("rz-burgershot:storge2")
-AddEventHandler("rz-burgershot:storge2", function()
-    if onDuty then
-        TriggerEvent("inventory:client:SetCurrentStash", "storge2")
-        TriggerServerEvent("inventory:server:OpenInventory", "stash", "storge2", {
-            maxweight = 250000,
-            slots = 40,
-        })
-    else
-        QBCore.Functions.Notify(Lang:t("notify.duty"), "error")
-    end
+RegisterNetEvent('rz-burgershot:friesmenu', function(data)
+    exports['qb-menu']:openMenu({
+        {
+            header = Lang:t("qbmenu.friestmenu"),
+            isMenuHeader = true
+        },
+        { 
+            header = Lang:t("qbmenu.friestmenu"),
+            txt = "",
+            params = {
+                event = "rz-burgershot:friestlist",
+            }
+        },
+        {
+            header = Lang:t("qbmenu.closemenu"),
+            params = { 
+                event = "qb-menu:client:closeMenu"
+            }
+        },
+    })
 end)
 
-RegisterNetEvent("rz-burgershot:smallpacket")
-AddEventHandler("rz-burgershot:smallpacket", function()
-    if onDuty then
-        if clean then 
-            QBCore.Functions.TriggerCallback('rz:eat:server:get:smallpacket', function(HasItems)  
-                if HasItems then
-                    QBCore.Functions.Progressbar("pickup_sla", Lang:t("label.small"), Config.ProgressbarTime, false, true, {
-                        disableMovement = true,
-                        disableCarMovement = true,
-                        disableMouse = false,
-                        disableCombat = true,
-                    }, {
-                        animDict = "mini@repair",
-                        anim = "fixing_a_player",
-                        flags = 49,
-                    }, {}, {}, function() -- Done
-                            TriggerServerEvent('rz-burgershot:add:smallpacket')
-                            Dirt()
-                            client = true
-                        QBCore.Functions.Notify(Lang:t("notify.createpacket"), "success")
-                    end, function()
-                        QBCore.Functions.Notify(Lang:t("notify.cancel"), "error")
-                    end)
-                else
-                    QBCore.Functions.Notify(Lang:t("notify.needıtem"), "error")
-                end
-            end)
-        else
-            QBCore.Functions.Notify(Lang:t("notify.clean"), "error")
-        end
-    else
-        QBCore.Functions.Notify(Lang:t("notify.duty"), "error")
-    end
+RegisterNetEvent('rz-burgershot:friestlist', function(data)
+    exports['qb-menu']:openMenu({
+        {
+            header = Lang:t("qbmenu.frieslistmenu"),
+            isMenuHeader = true
+        },
+        { 
+            header = Lang:t("qbmenu.bigpotatoheader"),
+            txt = Lang:t("qbmenu.bigpotatotxt"),
+            params = {
+                event = "rz-burgershot:client:bigpotato",
+            }
+        },
+        { 
+            header = Lang:t("qbmenu.smallpotatoheader"),
+            txt = Lang:t("qbmenu.smallpotatotxt"),
+            params = {
+                event = "rz-burgershot:client:smallpotato",
+            }
+        },
+        { 
+            header = Lang:t("qbmenu.ringsheader"),
+            txt = Lang:t("qbmenu.ringstxt"),
+            params = {
+                event = "rz-burgershot:client:rings",
+            }
+        },
+        { 
+            header = Lang:t("qbmenu.nuggetsheader"),
+            txt = Lang:t("qbmenu.nuggetstxt"),
+            params = {
+                event = "rz-burgershot:client:nuggets",
+            }
+        },
+        { 
+            header = Lang:t("qbmenu.backmenu"),
+            params = {
+                event = "rz-burgershot:friesmenu",
+            }
+        },
+    })
 end)
 
-RegisterNetEvent("rz-burgershot:bigpacket")
-AddEventHandler("rz-burgershot:bigpacket", function()
-    if onDuty then
-        if clean then 
-            QBCore.Functions.TriggerCallback('rz:eat:server:get:bigpacket', function(HasItems)  
-                if HasItems then
-                    QBCore.Functions.Progressbar("pickup_big", Lang:t("label.big"), Config.ProgressbarTime, false, true, {
-                        disableMovement = true,
-                        disableCarMovement = true,
-                        disableMouse = false,
-                        disableCombat = true,
-                    }, {
-                        animDict = "mini@repair",
-                        anim = "fixing_a_player",
-                        flags = 49,
-                    }, {}, {}, function() -- Done
-                            TriggerServerEvent('rz-burgershot:add:bigpacket')
-                            Dirt()
-                            client = true
-                        QBCore.Functions.Notify(Lang:t("notify.createpacket"), "success")
-                    end, function()
-                        QBCore.Functions.Notify(Lang:t("notify.cancel"), "error")
-                    end)
-                else
-                    QBCore.Functions.Notify(Lang:t("notify.needıtem"), "error")
-                end
-            end)
-        else
-            QBCore.Functions.Notify(Lang:t("notify.clean"), "error")
-        end
-    else
-        QBCore.Functions.Notify(Lang:t("notify.duty"), "error")
-    end
+RegisterNetEvent('rz-burgershot:meatmenu', function(data)
+    exports['qb-menu']:openMenu({
+        {
+            header =  Lang:t("qbmenu.friesmeatmenu"),
+            isMenuHeader = true
+        },
+        { 
+            header = Lang:t("qbmenu.friesmeatheader"),
+            txt = Lang:t("qbmenu.friesmeatxt"),
+            params = {
+                event = "rz-burgershot:client:meat",
+            }
+        },
+    })
 end)
 
-RegisterNetEvent("rz-burgershot:goatpacket")
-AddEventHandler("rz-burgershot:goatpacket", function()
-    if onDuty then
-        if clean then 
-            QBCore.Functions.TriggerCallback('rz:eat:server:get:goatpacket', function(HasItems)  
-                if HasItems then
-                    QBCore.Functions.Progressbar("pickup_goat", Lang:t("label.goat"), Config.ProgressbarTime, false, true, {
-                        disableMovement = true,
-                        disableCarMovement = true,
-                        disableMouse = false,
-                        disableCombat = true,
-                    }, {
-                        animDict = "mini@repair",
-                        anim = "fixing_a_player",
-                        flags = 49,
-                    }, {}, {}, function() -- Done
-                            TriggerServerEvent('rz-burgershot:add:goatpacket')
-                            Dirt()
-                        QBCore.Functions.Notify(Lang:t("notify.createpacket"), "success")
-                    end, function()
-                        QBCore.Functions.Notify(Lang:t("notify.cancel"), "error")
-                    end)
-                else
-                    QBCore.Functions.Notify(Lang:t("notify.needıtem"), "error")
-                end
-            end)
-        else
-            QBCore.Functions.Notify(Lang:t("notify.clean"), "error")
-        end
-    else
-        QBCore.Functions.Notify(Lang:t("notify.duty"), "error")
-    end
+RegisterNetEvent('rz-burgershot:drinkmenu', function(data)
+    exports['qb-menu']:openMenu({
+        {
+            header = "Drink List Menu",
+            isMenuHeader = true
+        },
+        { 
+            header = Lang:t("qbmenu.bigsizecola"),
+            txt = Lang:t("qbmenu.bigsizecolatxt"),
+            params = {
+                event = "rz-burgershot:client:bigcola",
+            }
+        },
+        { 
+            header = Lang:t("qbmenu.smallsizecola"),
+            txt = Lang:t("qbmenu.smallsizecolatxt"),
+            params = {
+                event = "rz-burgershot:client:smallcola",
+            }
+        },
+        { 
+            header = Lang:t("qbmenu.coffee"),
+            txt = Lang:t("qbmenu.coffeetxt"),
+            params = {
+                event = "rz-burgershot:client:coffee",
+            }
+        },
+    })
 end)
 
-RegisterNetEvent("rz-burgershot:coffeepacket")
-AddEventHandler("rz-burgershot:coffeepacket", function()
-    if onDuty then
-        if clean then 
-            QBCore.Functions.TriggerCallback('rz:eat:server:get:coffeepacket', function(HasItems)  
-                if HasItems then
-                    QBCore.Functions.Progressbar("pickup_coffee", Lang:t("label.coffee"), Config.ProgressbarTime, false, true, {
-                        disableMovement = true,
-                        disableCarMovement = true,
-                        disableMouse = false,
-                        disableCombat = true,
-                    }, {
-                        animDict = "mini@repair",
-                        anim = "fixing_a_player",
-                        flags = 49,
-                    }, {}, {}, function() -- Done
-                            TriggerServerEvent('rz-burgershot:add:coffeepacket')
-                            Dirt()
-                        QBCore.Functions.Notify(Lang:t("notify.createpacket"), "success")
-                    end, function()
-                        QBCore.Functions.Notify(Lang:t("notify.cancel"), "error")
-                    end)
-                else
-                    QBCore.Functions.Notify(Lang:t("notify.needıtem"), "error")
-                end
-            end)
-        else
-            QBCore.Functions.Notify(Lang:t("notify.clean"), "error")
-        end
-    else
-        QBCore.Functions.Notify(Lang:t("notify.duty"), "error")
-    end
+RegisterNetEvent('rz-burgershot:burgermenu', function(data)
+    exports['qb-menu']:openMenu({
+        {
+            header = Lang:t("qbmenu.burgermenu"),
+            isMenuHeader = true
+        },
+        { 
+            header = Lang:t("qbmenu.bleederburgerheader"),
+            txt = Lang:t("qbmenu.bleederburgertxt"),
+            params = {
+                event = "rz-burgershot:client:bleederburger",
+            }
+        },
+        { 
+            header = Lang:t("qbmenu.bigkingburgerheader"),
+            txt = Lang:t("qbmenu.bigkingburgertxt"),
+            params = {
+                event = "rz-burgershot:client:bigkingburger",
+            }
+        },
+        { 
+            header = Lang:t("qbmenu.wrapheader"),
+            txt = Lang:t("qbmenu.wraptxt"),
+            params = {
+                event = "rz-burgershot:client:wrap",
+            }
+        },
+    })
 end)
 
-RegisterNetEvent("rz-burgershot:client:bigcola")
-AddEventHandler("rz-burgershot:client:bigcola", function()
-    if onDuty then
-        if clean then 
-            QBCore.Functions.TriggerCallback('rz-burgershot:itemcheck', function(data)
-                if data then
-                    QBCore.Functions.Progressbar("bigcola", Lang:t("label.bigcola"), Config.ProgressbarTime, false, true, {
-                        disableMovement = true,
-                        disableCarMovement = true,
-                        disableMouse = false,
-                        disableCombat = true,
-                    }, {
-                        animDict = "amb@prop_human_bbq@male@base",
-                        anim = "base",
-                        flags = 8,
-                    }, {}, {}, function() -- Done
-                            TriggerServerEvent('rz-burgershot:server:bigcola')
-                        QBCore.Functions.Notify(Lang:t("notify.createpacket"), "success")
-                    end, function()
-                        QBCore.Functions.Notify(Lang:t("notify.cancel"), "error")
-                    end)
-                else
-                    QBCore.Functions.Notify(Lang:t("notify.needıtem"), "error")
-                end
-            end, Config.BigEmptyGlass)
-        else
-            QBCore.Functions.Notify(Lang:t("notify.clean"), "error")
-        end
-    else
-        QBCore.Functions.Notify(Lang:t("notify.duty"), "error")
-    end
+RegisterNetEvent('rz-burgershot:icecream', function(data)
+    exports['qb-menu']:openMenu({
+        {
+            header = Lang:t("qbmenu.icecream"),
+            isMenuHeader = true
+        },
+        { 
+            header = Lang:t("qbmenu.chocolateicecream"),
+            params = {
+                event = "rz-burgershot:client:chocolateicecream",
+            }
+        },
+        { 
+            header = Lang:t("qbmenu.vanillaicecream"),
+            params = {
+                event = "rz-burgershot:client:vanillaicecream",
+            }
+        },
+        { 
+            header = Lang:t("qbmenu.thesmurfsicecream"),
+            params = {
+                event = "rz-burgershot:client:thesmurfsicecream",
+            }
+        },
+        ----
+        { 
+            header = Lang:t("qbmenu.strawberryicecream"),
+            params = {
+                event = "rz-burgershot:client:strawberryicecream",
+            }
+        },
+        { 
+            header = Lang:t("qbmenu.matchaicecream"),
+            params = {
+                event = "rz-burgershot:client:matchaicecream",
+            }
+        },
+        { 
+            header = Lang:t("qbmenu.ubeicecream"),
+            params = {
+                event = "rz-burgershot:client:ubeicecream",
+            }
+        },
+        { 
+            header = Lang:t("qbmenu.smurfetteicecream"),
+            params = {
+                event = "rz-burgershot:client:smurfetteicecream",
+            }
+        },
+        { 
+            header = Lang:t("qbmenu.unicornicecream"),
+            params = {
+                event = "rz-burgershot:client:unicornicecream",
+            }
+        },
+        { 
+            header = Lang:t("qbmenu.backmenu"),
+            params = {
+                event = "rz-burgershot:ordermenu",
+            }
+        },
+    })
 end)
 
-RegisterNetEvent("rz-burgershot:client:smallcola")
-AddEventHandler("rz-burgershot:client:smallcola", function()
-    if onDuty then
-        if clean then 
-            QBCore.Functions.TriggerCallback('rz-burgershot:itemcheck', function(data)
-                if data then
-                    QBCore.Functions.Progressbar("smallcola", Lang:t("label.smallcola"), Config.ProgressbarTime, false, true, {
-                        disableMovement = true,
-                        disableCarMovement = true,
-                        disableMouse = false,
-                        disableCombat = true,
-                    }, {
-                        animDict = "amb@prop_human_bbq@male@base",
-                        anim = "base",
-                        flags = 8,
-                    }, {}, {}, function() -- Done
-                            TriggerServerEvent('rz-burgershot:server:smallcola')
-                        QBCore.Functions.Notify(Lang:t("notify.createpacket"), "success")
-                    end, function()
-                        QBCore.Functions.Notify(Lang:t("notify.cancel"), "error")
-                    end)
-                else
-                    QBCore.Functions.Notify(Lang:t("notify.needıtem"), "error")
-                end
-            end, Config.SmallEmptyGlass)
-        else
-            QBCore.Functions.Notify(Lang:t("notify.clean"), "error")
-        end
-    else
-        QBCore.Functions.Notify(Lang:t("notify.duty"), "error")
-    end
+RegisterNetEvent('rz-burgershot:sellpacket', function(data)
+    exports['qb-menu']:openMenu({
+        {
+            header = Lang:t("qbmenu.packetmenuheader"),
+            isMenuHeader = true
+        },
+        { 
+            header = Lang:t("qbmenu.smallpacketsellheader"),
+            params = {
+                event = "rz-burgershot:client:startdeliverysmall",
+            }
+        },
+        { 
+            header = Lang:t("qbmenu.bigpacketsellheader"),
+            params = {
+                event = "rz-burgershot:client:startdeliverybig",
+            }
+        },
+    })
 end)
 
-RegisterNetEvent("rz-burgershot:client:coffee")
-AddEventHandler("rz-burgershot:client:coffee", function()
-    if onDuty then
-        if clean then 
-            QBCore.Functions.TriggerCallback('rz-burgershot:itemcheck', function(data)
-                if data then
-                    QBCore.Functions.Progressbar("coffee2", Lang:t("label.coffee2"), Config.ProgressbarTime, false, true, {
-                        disableMovement = true,
-                        disableCarMovement = true,
-                        disableMouse = false,
-                        disableCombat = true,
-                    }, {
-                        animDict = "amb@prop_human_bbq@male@base",
-                        anim = "base",
-                        flags = 8,
-                    }, {}, {}, function() -- Done
-                            TriggerServerEvent('rz-burgershot:server:coffee')
-                        QBCore.Functions.Notify(Lang:t("notify.createpacket"), "success")
-                    end, function()
-                        QBCore.Functions.Notify(Lang:t("notify.cancel"), "error")
-                    end)
-                else
-                    QBCore.Functions.Notify(Lang:t("notify.needıtem"), "error")
-                end
-            end, Config.CoffeeEmptyGlass)
-        else
-            QBCore.Functions.Notify(Lang:t("notify.clean"), "error")
-        end
-    else
-        QBCore.Functions.Notify(Lang:t("notify.duty"), "error")
-    end
-end)
 
-RegisterNetEvent("rz-burgershot:client:bigpotato")
-AddEventHandler("rz-burgershot:client:bigpotato", function()
-    if onDuty then
-        if clean then 
-            QBCore.Functions.TriggerCallback('rz:eat:server:get:bigpotato', function(HasItems)  
-                if HasItems then
-                    QBCore.Functions.Progressbar("bigpotato", Lang:t("label.bigpotato"), Config.ProgressbarTime, false, true, {
-                        disableMovement = true,
-                        disableCarMovement = true,
-                        disableMouse = false,
-                        disableCombat = true,
-                    }, {
-                        animDict = "amb@prop_human_bbq@male@base",
-                        anim = "base",
-                        flags = 8,
-                    }, {
-                        model = "prop_cs_fork",
-                        bone = 28422,
-                        coords = vector3(-0.005, 0.00, 0.00),
-                        rotation = vector3(175.0, 160.0, 0.0),
-                    }, {}, function() -- Done
-                            TriggerServerEvent('rz-burgershot:server:bigpotato')
-                        QBCore.Functions.Notify(Lang:t("notify.createpacket"), "success")
-                    end, function()
-                        QBCore.Functions.Notify(Lang:t("notify.cancel"), "error")
-                    end)
-                else
-                    QBCore.Functions.Notify(Lang:t("notify.needıtem"), "error")
-                end
-            end)
-        else
-            QBCore.Functions.Notify(Lang:t("notify.clean"), "error")
-        end
-    else
-        QBCore.Functions.Notify(Lang:t("notify.duty"), "error")
-    end
-end)
+exports['qb-target']:AddCircleZone('duty', vector3(Config.Duty.x, Config.Duty.y, Config.Duty.z), 1.0,{
+    name = 'duty', debugPoly = false, useZ=true}, {
+    options = {{label = Lang:t("label.duty") ,icon = 'fa-solid fa-hand-holding', job = Config.Job, action = function() TriggerEvent('rz-burgershot:dutymenu') end}},
+    distance = 1.0
+})
 
-RegisterNetEvent("rz-burgershot:client:smallpotato")
-AddEventHandler("rz-burgershot:client:smallpotato", function()
-    if onDuty then
-        if clean then 
-            QBCore.Functions.TriggerCallback('rz:eat:server:get:smallpotato', function(HasItems)  
-                if HasItems then
-                    QBCore.Functions.Progressbar("smallpotato", Lang:t("label.smallpotato"), Config.ProgressbarTime, false, true, {
-                        disableMovement = true,
-                        disableCarMovement = true,
-                        disableMouse = false,
-                        disableCombat = true,
-                    }, {
-                        animDict = "amb@prop_human_bbq@male@base",
-                        anim = "base",
-                        flags = 8,
-                    }, {
-                        model = "prop_cs_fork",
-                        bone = 28422,
-                        coords = vector3(-0.005, 0.00, 0.00),
-                        rotation = vector3(175.0, 160.0, 0.0),
-                    }, {}, function() -- Done
-                            TriggerServerEvent('rz-burgershot:server:smallpotato')
-                        QBCore.Functions.Notify(Lang:t("notify.createpacket"), "success")
-                    end, function()
-                        QBCore.Functions.Notify(Lang:t("notify.cancel"), "error")
-                    end)
-                else
-                    QBCore.Functions.Notify(Lang:t("notify.needıtem"), "error")
-                end
-            end)
-        else
-            QBCore.Functions.Notify(Lang:t("notify.clean"), "error")
-        end
-    else
-        QBCore.Functions.Notify(Lang:t("notify.duty"), "error")
-    end
-end)
+exports['qb-target']:AddCircleZone('tray', vector3(Config.Tray.x, Config.Tray.y, Config.Tray.z), 1.0,{
+    name = 'tray', debugPoly = false, useZ=true}, {
+    options = {{label = Lang:t("label.tray") ,icon = 'fa-solid fa-hand-holding', action = function() TriggerEvent('rz-burgershot:tray') end}},
+    distance = 2.0
+})
 
-RegisterNetEvent("rz-burgershot:client:rings")
-AddEventHandler("rz-burgershot:client:rings", function()
-    if onDuty then
-        if clean then 
-            QBCore.Functions.TriggerCallback('rz:eat:server:get:rings', function(HasItems)  
-                if HasItems then
-                    QBCore.Functions.Progressbar("rings", Lang:t("label.rings"), Config.ProgressbarTime, false, true, {
-                        disableMovement = true,
-                        disableCarMovement = true,
-                        disableMouse = false,
-                        disableCombat = true,
-                    }, {
-                        animDict = "amb@prop_human_bbq@male@base",
-                        anim = "base",
-                        flags = 8,
-                    }, {
-                        model = "prop_cs_fork",
-                        bone = 28422,
-                        coords = vector3(-0.005, 0.00, 0.00),
-                        rotation = vector3(175.0, 160.0, 0.0),
-                    }, {}, function() -- Done
-                        TriggerServerEvent('rz-burgershot:server:rings')
-                        QBCore.Functions.Notify(Lang:t("notify.createpacket"), "success")
-                    end, function()
-                        QBCore.Functions.Notify(Lang:t("notify.cancel"), "error")
-                    end)
-                else
-                    QBCore.Functions.Notify(Lang:t("notify.needıtem"), "error")
-                end
-            end)
-        else
-            QBCore.Functions.Notify(Lang:t("notify.clean"), "error")
-        end
-    else
-        QBCore.Functions.Notify(Lang:t("notify.duty"), "error")
-    end
-end)
+exports['qb-target']:AddCircleZone('tray2', vector3(Config.Tray2.x, Config.Tray2.y, Config.Tray2.z), 1.0,{
+    name = 'tray2', debugPoly = false, useZ=true}, {
+    options = {{label = Lang:t("label.tray") ,icon = 'fa-solid fa-hand-holding',  action = function() TriggerEvent('rz-burgershot:tray2') end}},
+    distance = 2.0
+})
 
-RegisterNetEvent("rz-burgershot:client:nuggets")
-AddEventHandler("rz-burgershot:client:nuggets", function()
-    if onDuty then
-        if clean then 
-            QBCore.Functions.TriggerCallback('rz:eat:server:get:nuggets', function(HasItems)  
-                if HasItems then
-                    QBCore.Functions.Progressbar("nuggets", Lang:t("label.nuggets"), Config.ProgressbarTime, false, true, {
-                        disableMovement = true,
-                        disableCarMovement = true,
-                        disableMouse = false,
-                        disableCombat = true,
-                    }, {
-                        animDict = "amb@prop_human_bbq@male@base",
-                        anim = "base",
-                        flags = 8,
-                    }, {
-                        model = "prop_cs_fork",
-                        bone = 28422,
-                        coords = vector3(-0.005, 0.00, 0.00),
-                        rotation = vector3(175.0, 160.0, 0.0),
-                    }, {}, function() -- Done
-                            TriggerServerEvent('rz-burgershot:server:nuggets')
-                        QBCore.Functions.Notify(Lang:t("notify.createpacket"), "success")
-                    end, function()
-                        QBCore.Functions.Notify(Lang:t("notify.cancel"), "error")
-                    end)
-                else
-                    QBCore.Functions.Notify(Lang:t("notify.needıtem"), "error")
-                end
-            end)
-        else
-            QBCore.Functions.Notify(Lang:t("notify.clean"), "error")
-        end
-    else
-        QBCore.Functions.Notify(Lang:t("notify.duty"), "error")
-    end
-end)
+exports['qb-target']:AddCircleZone('tray3', vector3(Config.Tray3.x, Config.Tray3.y, Config.Tray3.z), 1.0,{
+    name = 'tray3', debugPoly = false, useZ=true}, {
+    options = {{label = Lang:t("label.tray") ,icon = 'fa-solid fa-hand-holding', action = function() TriggerEvent('rz-burgershot:tray3') end}},
+    distance = 2.0
+})
 
-RegisterNetEvent("rz-burgershot:client:meat")
-AddEventHandler("rz-burgershot:client:meat", function()
-    if onDuty then
-        if clean then 
-            QBCore.Functions.TriggerCallback('rz-burgershot:itemcheck', function(data)
-                if data then
-                    QBCore.Functions.Progressbar("meat", Lang:t("label.meat"), Config.ProgressbarTime, false, true, {
-                        disableMovement = true,
-                        disableCarMovement = true,
-                        disableMouse = false,
-                        disableCombat = true,
-                    }, {
-                        animDict = "amb@prop_human_bbq@male@base",
-                        anim = "base",
-                        flags = 8,
-                    }, {
-                        model = "prop_cs_fork",
-                        bone = 28422,
-                        coords = vector3(-0.005, 0.00, 0.00),
-                        rotation = vector3(175.0, 160.0, 0.0),
-                    }, {}, function() -- Done
-                            TriggerServerEvent('rz-burgershot:server:meat')
-                        QBCore.Functions.Notify(Lang:t("notify.createpacket"), "success")
-                    end, function()
-                        QBCore.Functions.Notify(Lang:t("notify.cancel"), "error")
-                    end)
-                else
-                    QBCore.Functions.Notify(Lang:t("notify.needıtem"), "error")
-                end
-            end, Config.FrozenMeat)
-        else
-            QBCore.Functions.Notify(Lang:t("notify.clean"), "error")
-        end
-    else
-        QBCore.Functions.Notify(Lang:t("notify.duty"), "error")
-    end
-end)
+exports['qb-target']:AddCircleZone('tray4', vector3(Config.Tray4.x, Config.Tray4.y, Config.Tray4.z), 1.0,{
+    name = 'tray4', debugPoly = false, useZ=true}, {
+    options = {{label = Lang:t("label.tray") ,icon = 'fa-solid fa-hand-holding',  action = function() TriggerEvent('rz-burgershot:tray4') end}},
+    distance = 2.0
+})
 
-RegisterNetEvent("rz-burgershot:client:bleederburger")
-AddEventHandler("rz-burgershot:client:bleederburger", function()
-    if onDuty then
-        if clean then 
-            QBCore.Functions.TriggerCallback('rz:eat:server:get:bleederburger', function(HasItems)  
-                if HasItems then
-                    QBCore.Functions.Progressbar("bleederburger", Lang:t("label.bleederburger"), Config.ProgressbarTime, false, true, {
-                        disableMovement = true,
-                        disableCarMovement = true,
-                        disableMouse = false,
-                        disableCombat = true,
-                    }, {
-                        animDict = "mini@repair",
-                        anim = "fixing_a_player",
-                        flags = 49,
-                    }, {}, {}, function() -- Done
-                            TriggerServerEvent('rz-burgershot:server:bleederburger')
-                            Dirt()
-                        QBCore.Functions.Notify(Lang:t("notify.createpacket"), "success")
-                    end, function()
-                        QBCore.Functions.Notify(Lang:t("notify.cancel"), "error")
-                    end)
-                else
-                    QBCore.Functions.Notify(Lang:t("notify.needıtem"), "error")
-                end
-            end)
-        else
-            QBCore.Functions.Notify(Lang:t("notify.clean"), "error")
-        end
-    else
-        QBCore.Functions.Notify(Lang:t("notify.duty"), "error")
-    end
-end)
+exports['qb-target']:AddCircleZone('Storge', vector3(Config.Storge.x, Config.Storge.y, Config.Storge.z), 1.0,{
+    name = 'Storge', debugPoly = false, useZ=true}, {
+    options = {{label = Lang:t("label.storge") ,icon = 'fa-solid fa-hand-holding', job = Config.Job, action = function() TriggerEvent('rz-burgershot:storge') end}},
+    distance = 1.0
+})
 
-RegisterNetEvent("rz-burgershot:client:bigkingburger")
-AddEventHandler("rz-burgershot:client:bigkingburger", function()
-    if onDuty then
-        if clean then 
-            QBCore.Functions.TriggerCallback('rz:eat:server:get:bigkingburger', function(HasItems)  
-                if HasItems then
-                    QBCore.Functions.Progressbar("bigkingburger", Lang:t("label.bigkingburger"), Config.ProgressbarTime, false, true, {
-                        disableMovement = true,
-                        disableCarMovement = true,
-                        disableMouse = false,
-                        disableCombat = true,
-                    }, {
-                        animDict = "mini@repair",
-                        anim = "fixing_a_player",
-                        flags = 49,
-                    }, {}, {}, function() -- Done
-                            TriggerServerEvent('rz-burgershot:server:bigkingburger')
-                            Dirt()
-                        QBCore.Functions.Notify(Lang:t("notify.createpacket"), "success")
-                    end, function()
-                        QBCore.Functions.Notify(Lang:t("notify.cancel"), "error")
-                    end)
-                else
-                    QBCore.Functions.Notify(Lang:t("notify.needıtem"), "error")
-                end
-            end) 
-        else
-            QBCore.Functions.Notify(Lang:t("notify.clean"), "error")
-        end
-    else
-        QBCore.Functions.Notify(Lang:t("notify.duty"), "error")
-    end
-end)
+exports['qb-target']:AddCircleZone('Fridge', vector3(Config.Fridge.x, Config.Fridge.y, Config.Fridge.z), 1.0,{
+    name = 'Fridge', debugPoly = false, useZ=true}, {
+    options = {{label = Lang:t("label.Fridge") ,icon = 'fa-solid fa-hand-holding', job = Config.Job, action = function() TriggerEvent('rz-burgershot:ordermenu') end}},
+    distance = 1.0
+})
 
-RegisterNetEvent("rz-burgershot:client:wrap")
-AddEventHandler("rz-burgershot:client:wrap", function()
-    if onDuty then
-        if clean then 
-            QBCore.Functions.TriggerCallback('rz:eat:server:get:wrap', function(HasItems)  
-                if HasItems then
-                    QBCore.Functions.Progressbar("wrap", Lang:t("label.wrap"), Config.ProgressbarTime, false, true, {
-                        disableMovement = true,
-                        disableCarMovement = true,
-                        disableMouse = false,
-                        disableCombat = true,
-                    }, {
-                        animDict = "mini@repair",
-                        anim = "fixing_a_player",
-                        flags = 49,
-                    }, {}, {}, function() -- Done
-                            TriggerServerEvent('rz-burgershot:server:wrap')
-                            Dirt()
-                        QBCore.Functions.Notify(Lang:t("notify.createpacket"), "success")
-                    end, function()
-                        QBCore.Functions.Notify(Lang:t("notify.cancel"), "error")
-                    end)
-                else
-                    QBCore.Functions.Notify(Lang:t("notify.needıtem"), "error")
-                end
-            end) 
-        else
-            QBCore.Functions.Notify(Lang:t("notify.clean"), "error")
-        end
-    else
-        QBCore.Functions.Notify(Lang:t("notify.duty"), "error")
-    end
-end)
+exports['qb-target']:AddCircleZone('Fridge2', vector3(Config.Fridge2.x, Config.Fridge2.y, Config.Fridge2.z), 1.0,{
+    name = 'Fridge2', debugPoly = false, useZ=true}, {
+    options = {{label = Lang:t("label.Fridge") ,icon = 'fa-solid fa-hand-holding', job = Config.Job, action = function() TriggerEvent('rz-burgershot:ordermenu') end}},
+    distance = 1.0
+})
 
-RegisterNetEvent("rz-burgershot:client:macaroon")
-AddEventHandler("rz-burgershot:client:macaroon", function()
-    if onDuty then
-        if clean then 
-            QBCore.Functions.Progressbar("macaroon", Lang:t("label.macaroon"), Config.ProgressbarTime, false, true, {
-                disableMovement = true,
-                disableCarMovement = true,
-                disableMouse = false,
-                disableCombat = true,
-            }, {
-                animDict = "mp_common",
-                anim = "givetake1_a",
-                flags = 8,
-            }, {}, {}, function() -- Done
-                    TriggerServerEvent('rz-burgershot:server:macaroon')
-                    Dirt()
-                QBCore.Functions.Notify(Lang:t("notify.createpacket"), "success")
-            end, function()
-                QBCore.Functions.Notify(Lang:t("notify.cancel"), "error")
-            end)
-        else
-            QBCore.Functions.Notify(Lang:t("notify.clean"), "error")
-        end
-    else
-        QBCore.Functions.Notify(Lang:t("notify.duty"), "error")
-    end
-end)
+exports['qb-target']:AddCircleZone('Fries', vector3(Config.Fries.x, Config.Fries.y, Config.Fries.z), 1.0,{
+    name = 'Fries', debugPoly = false, useZ=true}, {
+    options = {{label = Lang:t("label.Fries") ,icon = 'fa-solid fa-hand-holding', job = Config.Job, action = function() TriggerEvent('rz-burgershot:friesmenu') end}},
+    distance = 1.0
+})
 
-RegisterNetEvent("rz-burgershot:client:chocolateicecream")
-AddEventHandler("rz-burgershot:client:chocolateicecream", function()
-    if onDuty then
-        if clean then 
-            QBCore.Functions.TriggerCallback('rz-burgershot:itemcheck', function(data)
-                if data then
-                    QBCore.Functions.Progressbar("chocolateicecream", Lang:t("label.chocolateicecream"), Config.ProgressbarTime, false, true, {
-                        disableMovement = true,
-                        disableCarMovement = true,
-                        disableMouse = false,
-                        disableCombat = true,
-                    }, {
-                        animDict = "amb@prop_human_bbq@male@base",
-                        anim = "base",
-                        flags = 8,
-                    }, {}, {}, function() -- Done
-                            TriggerServerEvent('rz-burgershot:server:chocolateicecream')
-                        QBCore.Functions.Notify(Lang:t("notify.createpacket"), "success")
-                    end, function()
-                        QBCore.Functions.Notify(Lang:t("notify.cancel"), "error")
-                    end)
-                else
-                    QBCore.Functions.Notify(Lang:t("notify.needıtem"), "error")
-                end
-            end, Config.Cone) 
-        else
-            QBCore.Functions.Notify(Lang:t("notify.clean"), "error")
-        end
-    else
-        QBCore.Functions.Notify(Lang:t("notify.duty"), "error")
-    end
-end)
+exports['qb-target']:AddCircleZone('Drink', vector3(Config.Drink.x, Config.Drink.y, Config.Drink.z), 1.0,{
+    name = 'Drink', debugPoly = false, useZ=true}, {
+    options = {{label = Lang:t("label.Drink") ,icon = 'fa-solid fa-hand-holding', job = Config.Job, action = function() TriggerEvent('rz-burgershot:drinkmenu') end}},
+    distance = 1.0
+})
 
-RegisterNetEvent("rz-burgershot:client:vanillaicecream")
-AddEventHandler("rz-burgershot:client:vanillaicecream", function()
-    if onDuty then
-        if clean then 
-            QBCore.Functions.TriggerCallback('rz-burgershot:itemcheck', function(data)
-                if data then
-                    QBCore.Functions.Progressbar("vanillaicecream", Lang:t("label.vanillaicecream"), Config.ProgressbarTime, false, true, {
-                        disableMovement = true,
-                        disableCarMovement = true,
-                        disableMouse = false,
-                        disableCombat = true,
-                    }, {
-                        animDict = "amb@prop_human_bbq@male@base",
-                        anim = "base",
-                        flags = 8,
-                    }, {}, {}, function() -- Done
-                            TriggerServerEvent('rz-burgershot:server:vanillaicecream')
-                        QBCore.Functions.Notify(Lang:t("notify.createpacket"), "success")
-                    end, function()
-                        QBCore.Functions.Notify(Lang:t("notify.cancel"), "error")
-                    end)
-                else
-                    QBCore.Functions.Notify(Lang:t("notify.needıtem"), "error")
-                end
-            end, Config.Cone) 
-        else
-            QBCore.Functions.Notify(Lang:t("notify.clean"), "error")
-        end
-    else
-        QBCore.Functions.Notify(Lang:t("notify.duty"), "error")
-    end
-end)
+exports['qb-target']:AddCircleZone('Meat', vector3(Config.MeatStation.x, Config.MeatStation.y, Config.MeatStation.z), 1.0,{
+    name = 'Meat', debugPoly = false, useZ=true}, {
+    options = {{label = Lang:t("label.Meat") ,icon = 'fa-solid fa-hand-holding', job = Config.Job, action = function() TriggerEvent('rz-burgershot:meatmenu') end}},
+    distance = 1.0
+})
 
-RegisterNetEvent("rz-burgershot:client:thesmurfsicecream")
-AddEventHandler("rz-burgershot:client:thesmurfsicecream", function()
-    if onDuty then
-        if clean then 
-            QBCore.Functions.TriggerCallback('rz-burgershot:itemcheck', function(data)
-                if data then
-                    QBCore.Functions.Progressbar("thesmurfsicecream", Lang:t("label.thesmurfsicecream"), Config.ProgressbarTime, false, true, {
-                        disableMovement = true,
-                        disableCarMovement = true,
-                        disableMouse = false,
-                        disableCombat = true,
-                    }, {
-                        animDict = "amb@prop_human_bbq@male@base",
-                        anim = "base",
-                        flags = 8,
-                    }, {}, {}, function() -- Done
-                            TriggerServerEvent('rz-burgershot:server:thesmurfsicecream')
-                        QBCore.Functions.Notify(Lang:t("notify.createpacket"), "success")
-                    end, function()
-                        QBCore.Functions.Notify(Lang:t("notify.cancel"), "error")
-                    end)
-                else
-                    QBCore.Functions.Notify(Lang:t("notify.needıtem"), "error")
-                end
-            end, Config.Cone) 
-        else
-            QBCore.Functions.Notify(Lang:t("notify.clean"), "error")
-        end
-    else
-        QBCore.Functions.Notify(Lang:t("notify.duty"), "error")
-    end
-end)
+exports['qb-target']:AddCircleZone('BurgerStation', vector3(Config.BurgerStation.x, Config.BurgerStation.y, Config.BurgerStation.z), 1.0,{
+    name = 'BurgerStation', debugPoly = false, useZ=true}, {
+    options = {{label = Lang:t("label.BurgerStation") ,icon = 'fa-solid fa-hand-holding', job = Config.Job, action = function() TriggerEvent('rz-burgershot:burgermenu') end}},
+    distance = 1.0
+})
 
-RegisterNetEvent("rz-burgershot:client:strawberryicecream")
-AddEventHandler("rz-burgershot:client:strawberryicecream", function()
-    if onDuty then
-        if clean then 
-            QBCore.Functions.TriggerCallback('rz-burgershot:itemcheck', function(data)
-                if data then
-                    QBCore.Functions.Progressbar("strawberryicecream", Lang:t("label.strawberryicecream"), Config.ProgressbarTime, false, true, {
-                        disableMovement = true,
-                        disableCarMovement = true,
-                        disableMouse = false,
-                        disableCombat = true,
-                    }, {
-                        animDict = "amb@prop_human_bbq@male@base",
-                        anim = "base",
-                        flags = 8,
-                    }, {}, {}, function() -- Done
-                            TriggerServerEvent('rz-burgershot:server:strawberryicecream')
-                        QBCore.Functions.Notify(Lang:t("notify.createpacket"), "success")
-                    end, function()
-                        QBCore.Functions.Notify(Lang:t("notify.cancel"), "error")
-                    end)
-                else
-                    QBCore.Functions.Notify(Lang:t("notify.needıtem"), "error")
-                end
-            end, Config.Cone) 
-        else
-            QBCore.Functions.Notify(Lang:t("notify.clean"), "error")
-        end
-    else
-        QBCore.Functions.Notify(Lang:t("notify.duty"), "error")
-    end
-end)
+exports['qb-target']:AddCircleZone('PackageStation', vector3(Config.PackageStation.x, Config.PackageStation.y, Config.PackageStation.z), 1.0,{
+    name = 'PackageStation', debugPoly = false, useZ=true}, {
+    options = {{label = Lang:t("label.PackageStation") ,icon = 'fa-solid fa-hand-holding', job = Config.Job, action = function() TriggerEvent('rz:eat:craftmenu') end}},
+    distance = 1.0
+})
 
-RegisterNetEvent("rz-burgershot:client:matchaicecream")
-AddEventHandler("rz-burgershot:client:matchaicecream", function()
-    if onDuty then
-        if clean then 
-            QBCore.Functions.TriggerCallback('rz-burgershot:itemcheck', function(data)
-                if data then
-                    QBCore.Functions.Progressbar("matchaicecream", Lang:t("label.matchaicecream"), Config.ProgressbarTime, false, true, {
-                        disableMovement = true,
-                        disableCarMovement = true,
-                        disableMouse = false,
-                        disableCombat = true,
-                    }, {
-                        animDict = "amb@prop_human_bbq@male@base",
-                        anim = "base",
-                        flags = 8,
-                    }, {}, {}, function() -- Done
-                            TriggerServerEvent('rz-burgershot:server:matchaicecream')
-                        QBCore.Functions.Notify(Lang:t("notify.createpacket"), "success")
-                    end, function()
-                        QBCore.Functions.Notify(Lang:t("notify.cancel"), "error")
-                    end)
-                else
-                    QBCore.Functions.Notify(Lang:t("notify.needıtem"), "error")
-                end
-            end, Config.Cone) 
-        else
-            QBCore.Functions.Notify(Lang:t("notify.clean"), "error")
-        end
-    else
-        QBCore.Functions.Notify(Lang:t("notify.duty"), "error")
-    end
-end)
+exports['qb-target']:AddCircleZone('PackageStation2', vector3(Config.PackageStation2.x, Config.PackageStation2.y, Config.PackageStation2.z), 1.0,{
+    name = 'PackageStation2', debugPoly = false, useZ=true}, {
+    options = {{label = Lang:t("label.PackageStation") ,icon = 'fa-solid fa-hand-holding', job = Config.Job, action = function() TriggerEvent('rz:eat:craftmenu') end}},
+    distance = 1.0
+})
 
-RegisterNetEvent("rz-burgershot:client:ubeicecream")
-AddEventHandler("rz-burgershot:client:ubeicecream", function()
-    if onDuty then
-        if clean then 
-            QBCore.Functions.TriggerCallback('rz-burgershot:itemcheck', function(data)
-                if data then
-                    QBCore.Functions.Progressbar("ubeicecream", Lang:t("label.ubeicecream"), Config.ProgressbarTime, false, true, {
-                        disableMovement = true,
-                        disableCarMovement = true,
-                        disableMouse = false,
-                        disableCombat = true,
-                    }, {
-                        animDict = "amb@prop_human_bbq@male@base",
-                        anim = "base",
-                        flags = 8,
-                    }, {}, {}, function() -- Done
-                            TriggerServerEvent('rz-burgershot:server:ubeicecream')
-                        QBCore.Functions.Notify(Lang:t("notify.createpacket"), "success")
-                    end, function()
-                        QBCore.Functions.Notify(Lang:t("notify.cancel"), "error")
-                    end)
-                else
-                    QBCore.Functions.Notify(Lang:t("notify.needıtem"), "error")
-                end
-            end, Config.Cone) 
-        else
-            QBCore.Functions.Notify(Lang:t("notify.clean"), "error")
-        end
-    else
-        QBCore.Functions.Notify(Lang:t("notify.duty"), "error")
-    end
-end)
 
-RegisterNetEvent("rz-burgershot:client:smurfetteicecream")
-AddEventHandler("rz-burgershot:client:smurfetteicecream", function()
-    if onDuty then
-        if clean then 
-            QBCore.Functions.TriggerCallback('rz-burgershot:itemcheck', function(data)
-                if data then
-                    QBCore.Functions.Progressbar("smurfetteicecream", Lang:t("label.smurfetteicecream"), Config.ProgressbarTime, false, true, {
-                        disableMovement = true,
-                        disableCarMovement = true,
-                        disableMouse = false,
-                        disableCombat = true,
-                    }, {
-                        animDict = "amb@prop_human_bbq@male@base",
-                        anim = "base",
-                        flags = 8,
-                    }, {}, {}, function() -- Done
-                            TriggerServerEvent('rz-burgershot:server:smurfetteicecream')
-                        QBCore.Functions.Notify(Lang:t("notify.createpacket"), "success")
-                    end, function()
-                        QBCore.Functions.Notify(Lang:t("notify.cancel"), "error")
-                    end)
-                else
-                    QBCore.Functions.Notify(Lang:t("notify.needıtem"), "error")
-                end
-            end, Config.Cone) 
-        else
-            QBCore.Functions.Notify(Lang:t("notify.clean"), "error")
-        end
-    else
-        QBCore.Functions.Notify(Lang:t("notify.duty"), "error")
-    end
-end)
+exports['qb-target']:AddCircleZone('Clean', vector3(Config.Clean.x, Config.Clean.y, Config.Clean.z), 1.0,{
+    name = 'Clean', debugPoly = false, useZ=true}, {
+    options = {{label = Lang:t("label.Clean") ,icon = 'fa-solid fa-hand-holding', job = Config.Job, action = function() TriggerEvent('rz-burgershot:client:clean') end}},
+    distance = 1.0
+})
 
-RegisterNetEvent("rz-burgershot:client:unicornicecream")
-AddEventHandler("rz-burgershot:client:unicornicecream", function()
-    if onDuty then
-        if clean then 
-            QBCore.Functions.TriggerCallback('rz-burgershot:itemcheck', function(data)
-                if data then
-                    QBCore.Functions.Progressbar("unicornicecream", Lang:t("label.unicornicecream"), Config.ProgressbarTime, false, true, {
-                        disableMovement = true,
-                        disableCarMovement = true,
-                        disableMouse = false,
-                        disableCombat = true,
-                    }, {
-                        animDict = "amb@prop_human_bbq@male@base",
-                        anim = "base",
-                        flags = 8,
-                    }, {}, {}, function() -- Done
-                            TriggerServerEvent('rz-burgershot:server:unicornicecream')
-                        QBCore.Functions.Notify(Lang:t("notify.createpacket"), "success")
-                    end, function()
-                        QBCore.Functions.Notify(Lang:t("notify.cancel"), "error")
-                    end)
-                else
-                    QBCore.Functions.Notify(Lang:t("notify.needıtem"), "error")
-                end
-            end, Config.Cone) 
-        else
-            QBCore.Functions.Notify(Lang:t("notify.clean"), "error")
-        end
-    else
-        QBCore.Functions.Notify(Lang:t("notify.duty"), "error")
-    end
-end)
+exports['qb-target']:AddCircleZone('SellItem', vector3(Config.SellItem.x, Config.SellItem.y, Config.SellItem.z), 1.0,{
+    name = 'SellItem', debugPoly = false, useZ=true}, {
+    options = {{label = Lang:t("label.SellItem") ,icon = 'fa-solid fa-hand-holding', job = Config.Job, action = function() TriggerEvent('rz-burgershot:sellpacket') end}},
+    distance = 1.0
+})
 
-RegisterNetEvent("rz-burgershot:client:clean")
-AddEventHandler("rz-burgershot:client:clean", function()
-    QBCore.Functions.Progressbar("clean", Lang:t("label.clean"), Config.ProgressbarTime, false, true, {
-        disableMovement = true,
-        disableCarMovement = true,
-        disableMouse = false,
-        disableCombat = true,
-    }, {
-        animDict = "amb@world_human_bum_standing@twitchy@idle_a",
-        anim = "idle_a",
-        flags = 49,
-    }, {}, {}, function() -- Done
-            clean = true
-        QBCore.Functions.Notify(Lang:t("notify.dirt2"), "success")
-    end, function()
-        QBCore.Functions.Notify(Lang:t("notify.cancel"), "error")
-    end)
-end)
-
-function Dirt()
-	if math.random(1,100) < Config.Dirt then
-		clean = false
-        QBCore.Functions.Notify(Lang:t("notify.dirt"), "error")
-	end
-end
-
-RegisterNetEvent("rz-burgershot:client:smallpacketsell")
-AddEventHandler("rz-burgershot:client:smallpacketsell", function()
-    if onDuty then
-        if client then
-            smallblip = true
-            random = math.random(1,#Config.SmallCoords)
-            QBCore.Functions.Notify(Lang:t("notify.neworder"), "primary")
-            SetNewWaypoint(Config.SmallCoords[random]["x"],Config.SmallCoords[random]["y"])
-            status = true
-            while status do
-                local ped = PlayerPedId()
-                local plycoords = GetEntityCoords(ped)
-                local distance = #(plycoords - vector3(Config.SmallCoords[random]["x"],Config.SmallCoords[random]["y"],Config.SmallCoords[random]["z"])) 
-                Citizen.Wait(1)
-                if distance < 1.0 and client  then
-                    QBCore.Functions.DrawText3D(Config.SmallCoords[random]["x"],Config.SmallCoords[random]["y"],Config.SmallCoords[random]["z"], Lang:t("label.deliver"))
-                    if IsControlJustPressed(1, 38) then
-                        SmallPacketSell()
-                    end
-                end	
-            end
-        end
-    else
-        QBCore.Functions.Notify(Lang:t("notify.duty"), "error")
-    end
-end)
-
-RegisterNetEvent("rz-burgershot:client:startdeliverysmall")
-AddEventHandler("rz-burgershot:client:startdeliverysmall", function()
-    if client then 
-        if delivery == 0 then
-            TriggerEvent("rz-burgershot:client:smallpacketsell")
-            QBCore.Functions.SpawnVehicle(Config.Car, function(vehicle)
-                SetEntityCoords(PlayerPed, Config.CarSpawnCoord.x, Config.CarSpawnCoord.y, Config.CarSpawnCoord.z-1.0)
-                TriggerEvent("vehiclekeys:client:SetOwner", GetVehicleNumberPlateText(vehicle))
-                TaskWarpPedIntoVehicle(PlayerPedId(), vehicle, -1)
-                SetVehicleLivery(vehicle, 14)
-                SetVehicleColours(vehicle, 30, 30, 30)
-                delivery = 1
-            end, Config.CarSpawnCoord, true)
-        else
-            QBCore.Functions.Notify(Lang:t("notify.ondelivery"), "error")
-        end
-    else
-        QBCore.Functions.Notify(Lang:t("notify.realy"), "error")
-    end
-end)
-
-RegisterNetEvent("rz-burgershot:client:startdeliverybig")
-AddEventHandler("rz-burgershot:client:startdeliverybig", function()
-    if client then 
-        if delivery == 0 then
-            TriggerEvent("rz-burgershot:client:bigpacketsell")
-            QBCore.Functions.SpawnVehicle(Config.Car, function(vehicle)
-                SetEntityCoords(PlayerPed, Config.CarSpawnCoord.x, Config.CarSpawnCoord.y, Config.CarSpawnCoord.z-1.0)
-                TriggerEvent("vehiclekeys:client:SetOwner", GetVehicleNumberPlateText(vehicle))
-                TaskWarpPedIntoVehicle(PlayerPedId(), vehicle, -1)
-                SetVehicleLivery(vehicle, 15)
-                SetVehicleColours(vehicle, 62, 62, 62)
-                delivery = 1
-            end, Config.CarSpawnCoord, true)
-        else
-            QBCore.Functions.Notify(Lang:t("notify.ondelivery"), "error")
-        end
-    else
-        QBCore.Functions.Notify(Lang:t("notify.realy"), "error")
-    end
-end)
-
-RegisterNetEvent("rz-burgershot:client:bigpacketsell")
-AddEventHandler("rz-burgershot:client:bigpacketsell", function()
-    if onDuty then
-        if client then
-            random = math.random(1,#Config.BigCoords)
-            QBCore.Functions.Notify(Lang:t("notify.neworder"), "primary")
-            SetNewWaypoint(Config.BigCoords[random]["x"],Config.BigCoords[random]["y"])
-            bigblip = true
-            status = true
-            while status do
-                local ped = PlayerPedId()
-                local plycoords = GetEntityCoords(ped)
-                local distance = #(plycoords - vector3(Config.BigCoords[random]["x"],Config.BigCoords[random]["y"],Config.BigCoords[random]["z"])) 
-                Citizen.Wait(1)
-                if distance < 1.0 and client then
-                    QBCore.Functions.DrawText3D(Config.BigCoords[random]["x"],Config.BigCoords[random]["y"],Config.BigCoords[random]["z"], Lang:t("label.deliver"))
-                    if IsControlJustPressed(1, 38) then
-                        BigPacketSell()
-                    end
-                end	
-            end
-        end
-    else
-        QBCore.Functions.Notify(Lang:t("notify.duty"), "error")
-    end
-end)
-
-RegisterNetEvent("rz-burgershot:client:sellingfinish")
-AddEventHandler("rz-burgershot:client:sellingfinish", function()
-    if IsPedInAnyVehicle(PlayerPedId()) then
-        if delivery == 1 then
-            local car = GetVehiclePedIsIn(PlayerPedId(),true)
-            NetworkFadeOutEntity(car, true,false)
-            QBCore.Functions.DeleteVehicle(car)
-            client = false
-            status = false
-            delivery = 0
-            QBCore.Functions.Notify(Lang:t("notify.finish"), "primary")
-        else
-            QBCore.Functions.Notify(Lang:t("notify.notselling"), "primary")
-        end
-    else
-        QBCore.Functions.Notify(Lang:t("notify.notfinish"), "primary")
-    end
-end)
-
-function SmallPacketSell()
-    local ped = PlayerPedId()
-    QBCore.Functions.TriggerCallback('rz-burgershot:itemcheck', function(data)
-        if data then
-            QBCore.Functions.Progressbar("smallpacksell", Lang:t("label.packetsell"), Config.ProgressbarTime, false, true, {
-                disableMovement = false,
-                disableCarMovement = false,
-                disableMouse = false,
-                disableCombat = true,
-                }, {
-                animDict = "timetable@jimmy@doorknock@",
-                anim = "knockdoor_idle",
-                flags = 49,
-            }, {}, {}, function() -- Done
-                TriggerServerEvent("rz-burgershot:server:smallpacketsell")
-                TriggerEvent("rz-burgershot:client:smallpacketsell")
-                map = true
-                ClearPedTasksImmediately(ped)
-            end, function() -- Cancel
-                -- Cancel
-            end)
-        else
-            QBCore.Functions.Notify(Lang:t("notify.needıtem"), "error")
-            client = false
-        end
-    end, Config.SmallBagItem) 
-end
-
-function BigPacketSell()
-    local ped = PlayerPedId()
-    QBCore.Functions.TriggerCallback('rz-burgershot:itemcheck', function(data)
-        if data then
-            QBCore.Functions.Progressbar("bigpacketsell", Lang:t("label.packetsell"), Config.ProgressbarTime, false, true, { 
-                disableMovement = false,
-                disableCarMovement = false,
-                disableMouse = false,
-                disableCombat = true,
-                }, {
-                animDict = "timetable@jimmy@doorknock@",
-                anim = "knockdoor_idle",
-                flags = 49,
-            }, {}, {}, function() -- Done
-                TriggerServerEvent("rz-burgershot:server:bigpacketsell")
-                TriggerEvent("rz-burgershot:client:bigpacketsell")
-                map = true
-                ClearPedTasksImmediately(ped)
-            end, function() -- Cancel
-                -- Cancel
-            end)
-        else
-            QBCore.Functions.Notify(Lang:t("notify.needıtem"), "error")
-            client = false
-        end
-    end, Config.BigBagItem) 
-end
-
-Citizen.CreateThread(function()
-    local blip = AddBlipForCoord(vector3(-1183.37, -884.14, 13.86))
-    SetBlipSprite(blip, 106)
-    SetBlipDisplay(blip, 2)
-    SetBlipScale(blip, 0.5)
-    SetBlipColour(blip, 1)
-    SetBlipAsShortRange(blip, true)
-    BeginTextCommandSetBlipName("STRING")
-    AddTextComponentString("Burger Shot")
-    EndTextCommandSetBlipName(blip)
-end)
-
-RegisterCommand("try", function()
-    client = true
-    onDuty = true
-    status = true
-end)
+exports['qb-target']:AddCircleZone('Finish', vector3(Config.Finish.x, Config.Finish.y, Config.Finish.z), 2.0,{
+    name = 'Finish', debugPoly = false, useZ=true}, {
+    options = {{label = "Finish" ,icon = 'fa-solid fa-hand-holding', job = Config.Job, action = function() TriggerEvent('rz-burgershot:client:sellingfinish') end}},
+    distance = 2.0
+})
