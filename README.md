@@ -1,8 +1,11 @@
 ![image](https://media.discordapp.net/attachments/352733374235803648/1064647586914504825/burgershot.png)
 
+# ALL CREDITS GO TO rz4never FOR THE SCRIPT AND uNiqx FOR THE MAP! ❤️
+
 # rz-burgershot
 - Detailed Burger Shot Job [QBCORE]
 - New QBCore
+- Updated for the Burgershot 2023 map!
 
 ## Video Showcase
 - https://youtu.be/MHwQo5yg-Kw
@@ -27,7 +30,7 @@
 ## Dependencies
 - [qb-core](https://github.com/qbcore-framework/qb-core)
 - [qb-target](https://github.com/qbcore-framework/qb-target)
-- [Burger-Shot-Ymap](https://www.gta5-mods.com/maps/burgershot-remastered-gta-v-interior-mod-gtadps)
+- [Burger-Shot-2023-Ymap](https://www.gta5-mods.com/maps/mlo-burgershot-2023-add-on-sp-fivem)
 - [Burger-Shot-Vehicle](https://www.gta5-mods.com/paintjobs/vapid-speedo-express-burgershot-livery)
 
 ## Installation
@@ -275,7 +278,7 @@ end)
 - Download the script and open images folder, put it in the `qb-inventory/html/images` directory.
 
 ### Map And Car
-- Download the burgershot-map & burgershot-van folder, put it in the your stream file directory.
+- Download the burgershot-2023-map, then go inside `[FIVEM]` and drag that to your resources folder & burgershot-van folder, put it in the your stream file directory.
 ```
 ensure burgershot-map
 ensure burgershot-van
@@ -289,17 +292,8 @@ ensure rz-burgershot
 ```
 
 ## Image Showcase
-![image](https://cdn.discordapp.com/attachments/352733374235803648/1064647070939623444/duty.png)
-![image](https://cdn.discordapp.com/attachments/352733374235803648/1064647082117447732/WASHhands.png)
-![image](https://media.discordapp.net/attachments/352733374235803648/1064647069534523613/CREATEBURGER.png)
-![image](https://media.discordapp.net/attachments/352733374235803648/1064647072214691941/FRIES.png)
-![image](https://media.discordapp.net/attachments/352733374235803648/1064647082595590204/meat.png)
-![image](https://media.discordapp.net/attachments/352733374235803648/1064647071375839413/fridge.png)
-![image](https://media.discordapp.net/attachments/352733374235803648/1064647068569833614/ICECREAM.png)
-![image](https://media.discordapp.net/attachments/352733374235803648/1064647071828807761/fridgeitems.png)
-![image](https://media.discordapp.net/attachments/352733374235803648/1064647070507602000/DRINKMENU.png)
-![image](https://media.discordapp.net/attachments/352733374235803648/1064647083027599451/packagemenu.png)
-![image](https://media.discordapp.net/attachments/352733374235803648/1064647070071410718/DELIVERY.png)
-![image](https://media.discordapp.net/attachments/352733374235803648/1064647069018640384/cars.png)
+![Screenshot 2023-05-17 184431](https://github.com/planeklm/rz-burgershot/assets/91488137/2027d1e3-a8a4-4274-88f8-6fe5f7dfe2c6)
+![image](https://github.com/planeklm/rz-burgershot/assets/91488137/532eb4f6-808a-47d6-abaa-86c354789be2)
+![image](https://github.com/planeklm/rz-burgershot/assets/91488137/06356945-a9b2-4472-82e3-7062607233cc)
 
-
+**ONE AGAIN ALL CREDITS AND THANKS GO TO rz4never FOR THE SCRIPT AND uNiqx FOR THE MAP!!! ❤️**
