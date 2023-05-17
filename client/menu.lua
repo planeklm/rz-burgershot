@@ -356,6 +356,18 @@ exports['qb-target']:AddCircleZone('tray2', vector3(Config.Tray2.x, Config.Tray2
     distance = 2.0
 })
 
+exports['qb-target']:AddCircleZone('tray3', vector3(Config.Tray3.x, Config.Tray3.y, Config.Tray3.z), 1.0,{
+    name = 'tray3', debugPoly = false, useZ=true}, {
+    options = {{label = Lang:t("label.tray") ,icon = 'fa-solid fa-hand-holding', action = function() TriggerEvent('rz-burgershot:tray3') end}},
+    distance = 2.0
+})
+
+exports['qb-target']:AddCircleZone('tray4', vector3(Config.Tray4.x, Config.Tray4.y, Config.Tray4.z), 1.0,{
+    name = 'tray4', debugPoly = false, useZ=true}, {
+    options = {{label = Lang:t("label.tray") ,icon = 'fa-solid fa-hand-holding',  action = function() TriggerEvent('rz-burgershot:tray4') end}},
+    distance = 2.0
+})
+
 exports['qb-target']:AddCircleZone('Storge', vector3(Config.Storge.x, Config.Storge.y, Config.Storge.z), 1.0,{
     name = 'Storge', debugPoly = false, useZ=true}, {
     options = {{label = Lang:t("label.storge") ,icon = 'fa-solid fa-hand-holding', job = Config.Job, action = function() TriggerEvent('rz-burgershot:storge') end}},
@@ -364,6 +376,12 @@ exports['qb-target']:AddCircleZone('Storge', vector3(Config.Storge.x, Config.Sto
 
 exports['qb-target']:AddCircleZone('Fridge', vector3(Config.Fridge.x, Config.Fridge.y, Config.Fridge.z), 1.0,{
     name = 'Fridge', debugPoly = false, useZ=true}, {
+    options = {{label = Lang:t("label.Fridge") ,icon = 'fa-solid fa-hand-holding', job = Config.Job, action = function() TriggerEvent('rz-burgershot:ordermenu') end}},
+    distance = 1.0
+})
+
+exports['qb-target']:AddCircleZone('Fridge2', vector3(Config.Fridge2.x, Config.Fridge2.y, Config.Fridge2.z), 1.0,{
+    name = 'Fridge2', debugPoly = false, useZ=true}, {
     options = {{label = Lang:t("label.Fridge") ,icon = 'fa-solid fa-hand-holding', job = Config.Job, action = function() TriggerEvent('rz-burgershot:ordermenu') end}},
     distance = 1.0
 })
@@ -398,6 +416,12 @@ exports['qb-target']:AddCircleZone('PackageStation', vector3(Config.PackageStati
     distance = 1.0
 })
 
+exports['qb-target']:AddCircleZone('PackageStation2', vector3(Config.PackageStation2.x, Config.PackageStation2.y, Config.PackageStation2.z), 1.0,{
+    name = 'PackageStation2', debugPoly = false, useZ=true}, {
+    options = {{label = Lang:t("label.PackageStation") ,icon = 'fa-solid fa-hand-holding', job = Config.Job, action = function() TriggerEvent('rz:eat:craftmenu') end}},
+    distance = 1.0
+})
+
 
 exports['qb-target']:AddCircleZone('Clean', vector3(Config.Clean.x, Config.Clean.y, Config.Clean.z), 1.0,{
     name = 'Clean', debugPoly = false, useZ=true}, {
@@ -416,8 +440,3 @@ exports['qb-target']:AddCircleZone('Finish', vector3(Config.Finish.x, Config.Fin
     options = {{label = "Finish" ,icon = 'fa-solid fa-hand-holding', job = Config.Job, action = function() TriggerEvent('rz-burgershot:client:sellingfinish') end}},
     distance = 2.0
 })
-
-
-
-
-
