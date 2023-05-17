@@ -5,7 +5,7 @@ Config.ProgressbarTime = 5000
 Config.Dirt = 10
 Config.SmallBagSellPrice = 2500
 Config.BigBagSellPrice = 5000
-Config.CarSpawnCoord = vector4(-1164.57, -891.6, 14.1, 121.93)
+Config.CarSpawnCoord = vector4(-1172.26, -875.87, 14.15, 118.64)
 Config.Car = "nspeedo"
 Config.SmallBagItem = 'burgershot_bagsmall' 
 Config.BigBagItem = 'burgershot_bagbig' 
@@ -19,19 +19,23 @@ Config.CoffeeBag = { 'burgershot_coffee', 'burgershot_macaroon' }
 
 ---------Burger Shot Job Coords---------
 
-Config.Duty = vector3(-1194.72, -900.11, 14.50)
-Config.Tray =  vector3(-1193.90, -894.37, 14.0) 
-Config.Tray2 =  vector3(-1195.26, -892.42, 14.0)
+Config.Duty = vector3(-1200.1389, -902.3147, 13.8862)
+Config.Tray =  vector3(-1196.8396, -892.7429, 13.2240) 
+Config.Tray2 =  vector3(-1194.9261, -893.2357, 13.4224)
+Config.Tray3 =  vector3(-1192.9097, -893.8406, 13.3091)
+Config.Tray4 =  vector3(-1190.8466, -894.3168, 13.2380)
 Config.Storge = vector3(-1197.58, -893.87, 14.0) 
 Config.Fridge = vector3(-1203.42, -895.9, 14.0)
-Config.BurgerStation = vector3(-1199.55, -902.28, 14.0)
-Config.Fries = vector3(-1201.52, -899.06, 14.0)
-Config.Drink =  vector3(-1199.57, -895.55, 14.0)
-Config.Garage = vector3(-1165.66, -887.96, 14.13) 
-Config.MeatStation = vector3(-1202.69, -897.46, 14.0)
-Config.PackageStation = vector3(-1196.64, -895.82, 14.0)
-Config.Clean = vector3(-1197.02, -902.17, 14.0)
-Config.SellItem = vector3(-1178.66, -891.76, 13.75)
+Config.Fridge2 = vector3(-1202.2231, -897.3181, 13.8862)
+Config.BurgerStation = vector3(-1200.4276, -894.4291, 13.8862)
+Config.Fries = vector3(-1196.1066, -899.7626, 13.4245)
+Config.Drink =  vector3(-1191.1401, -898.3242, 13.8862)
+Config.Garage = vector3(-1173.15, -876.31, 14.12) 
+Config.MeatStation = vector3(-1195.5558, -898.1918, 13.8862)
+Config.PackageStation = vector3(-1194.1604, -896.0889, 13.8862)
+Config.PackageStation2 = vector3(-1195.8055, -895.7147, 13.8862)
+Config.Clean = vector3(-1202.2675, -895.6980, 13.8862)
+Config.SellItem = vector3(-1196.0000, -901.7093, 13.8862)
 Config.Finish = vector3(-1164.57, -891.6, 14.1)
 
 ---------Burger Shot Job Small Sell Cord---------
